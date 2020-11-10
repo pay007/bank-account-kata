@@ -62,7 +62,7 @@ class BankAccountServiceTest {
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
         bankAccountService.withdrawal(accountId, BigDecimal.valueOf(200));
-        BalanceStatement currentAccountStatement = bankAccountService.getCurrentAccountStatement(accountId);
+        BalanceStatement currentAccountStatement = bankAccountService.getBalanceStatement(accountId);
         Assertions.assertEquals(expected.intValue(), currentAccountStatement.getBalance().intValue());
     }
 

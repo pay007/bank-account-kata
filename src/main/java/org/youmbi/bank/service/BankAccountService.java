@@ -111,7 +111,7 @@ public class BankAccountService {
      * @param accountId
      * @return {@link BalanceStatement} aggregate representation
      */
-    public BalanceStatement getCurrentAccountStatement(final Long accountId) {
+    public BalanceStatement getBalanceStatement(final Long accountId) {
         // query all events using order
         List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // Reduce events to determine current account Balance
