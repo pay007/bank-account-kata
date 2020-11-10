@@ -7,9 +7,9 @@ https://gist.github.com/abachar/d20bdcd07dac589feef8ef21b487648c
 # Assumption and scope
 
 This implementation is based on following assumption:
- - The bank account is creation is out of this scope and we are only using accountID passed as parameter by client
+ - The bank account is created by another service and we are only using accountID passed as parameter by client
  
- - Only 2 operations are supported 
+ - Only 2 operations are supported yet
      - DEPOSIT to increase account balance
      - WITHDRAWAL to decrease account balance
      
@@ -17,9 +17,9 @@ This implementation is based on following assumption:
      - No Account id ckeck
      - No overdraft limit
      
- - Test are covering basis use cases for simplicity
+ - Test are covering basis use cases for simplicity (account balance after deposit, withdrawal)
      
-# Description of implementation
+# Description
 
 This implementation is handling all user operations as ```Event``` and store them.
   - ElasticSearch is used as event storage (for simplicity i'm using a cluster with single node running on docker)
@@ -36,7 +36,7 @@ This implementation is handling all user operations as ```Event``` and store the
       ```
          curl -X GET "localhost:9200/_cat/nodes?v&pretty"
       ```
-  - There application is currently running into IDE (no docker image created yet for simplicity)
+  - The service can run into IDE directly (no docker image created yet for simplicity)
       For test :
       - DEPOSIT:  ```curl -X POST "localhost:8080/bank/12/deposit/200" ```
       - WITHDRAWAL ``` curl -X GET "localhost:8080/bank/12/withdrawal/100" ```
