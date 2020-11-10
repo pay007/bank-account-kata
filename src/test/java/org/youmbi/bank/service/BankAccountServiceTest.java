@@ -8,17 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.youmbi.bank.EsConfiguration;
-import org.youmbi.bank.entity.AccountEvent;
-import org.youmbi.bank.model.CurrentBankAccountStatement;
-import org.youmbi.bank.model.DetailedBankAccountStatement;
-import org.youmbi.bank.model.PrintedAccountStatement;
+import org.youmbi.bank.model.BalanceStatement;
+import org.youmbi.bank.model.AccountStatement;
 import org.youmbi.bank.repository.BankAccountRepository;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = {EsConfiguration.class})
@@ -44,7 +38,7 @@ class BankAccountServiceTest {
         Long accountId = 0L;
         BigDecimal amount = BigDecimal.valueOf(400);
         BigDecimal expectedBalance = BigDecimal.valueOf(400);
-        CurrentBankAccountStatement bankAccountStatement = bankAccountService.deposit(accountId, amount);
+        BalanceStatement bankAccountStatement = bankAccountService.deposit(accountId, amount);
         Assertions.assertEquals(expectedBalance.intValue(), bankAccountStatement.getBalance().intValue());
         Assertions.assertEquals(amount.intValue(), bankAccountStatement.getAmount().intValue());
     }
@@ -56,7 +50,7 @@ class BankAccountServiceTest {
         BigDecimal expected = BigDecimal.valueOf(-100);
         BigDecimal withdrawal = BigDecimal.valueOf(500);
         bankAccountService.deposit(accountId, deposit);
-        CurrentBankAccountStatement bankAccountStatement = bankAccountService.withdrawal(accountId, withdrawal);
+        BalanceStatement bankAccountStatement = bankAccountService.withdrawal(accountId, withdrawal);
         Assertions.assertEquals(expected.intValue(), bankAccountStatement.getBalance().intValue());
         Assertions.assertEquals(withdrawal.intValue(), bankAccountStatement.getAmount().intValue());
     }
@@ -68,7 +62,7 @@ class BankAccountServiceTest {
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
         bankAccountService.withdrawal(accountId, BigDecimal.valueOf(200));
-        CurrentBankAccountStatement currentAccountStatement = bankAccountService.getCurrentAccountStatement(accountId);
+        BalanceStatement currentAccountStatement = bankAccountService.getCurrentAccountStatement(accountId);
         Assertions.assertEquals(expected.intValue(), currentAccountStatement.getBalance().intValue());
     }
 
@@ -80,8 +74,8 @@ class BankAccountServiceTest {
         bankAccountService.withdrawal(accountId, BigDecimal.valueOf(200));
         bankAccountService.deposit(accountId, BigDecimal.valueOf(500));
         bankAccountService.withdrawal(accountId, BigDecimal.valueOf(100));
-        PrintedAccountStatement detailedStatement = bankAccountService.printDetailedStatement(accountId);
-        Assertions.assertEquals(expected.intValue(), detailedStatement.getSummary().getBalance().intValue());
+        AccountStatement detailedStatement = bankAccountService.getAccountStatement(accountId);
+        Assertions.assertEquals(expected.intValue(), detailedStatement.getBalanceStatement().getBalance().intValue());
         Assertions.assertEquals(4, detailedStatement.getDetails().size());
     }
 

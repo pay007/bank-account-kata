@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.youmbi.bank.exception.BankAccountException;
-import org.youmbi.bank.model.DetailedBankAccountStatement;
-import org.youmbi.bank.model.PrintedAccountStatement;
+import org.youmbi.bank.model.OperationDetails;
+import org.youmbi.bank.model.AccountStatement;
 import org.youmbi.bank.service.BankAccountService;
 
 import java.math.BigDecimal;
@@ -25,17 +25,17 @@ public class BankAccountControlller {
     }
 
     /**
-     * Return details of bank account statement as a list of {@link DetailedBankAccountStatement} which will
+     * Return details of bank account statement as a list of {@link OperationDetails} which will
      * be displayed to customer
      *
      * @param accountId account id
-     * @return list of {@link DetailedBankAccountStatement}
+     * @return list of {@link OperationDetails}
      * @throws Exception
      */
     @RequestMapping(path = "/{accountId}/printstatement", method = RequestMethod.GET)
-    public ResponseEntity<PrintedAccountStatement> printStatement(@PathVariable("accountId") String accountId) throws Exception {
+    public ResponseEntity<AccountStatement> printStatement(@PathVariable("accountId") String accountId) throws BankAccountException {
         assert accountId != null;
-        return Optional.ofNullable(bankAccountService.printDetailedStatement(Long.valueOf(accountId)))
+        return Optional.ofNullable(bankAccountService.getAccountStatement(Long.valueOf(accountId)))
                 .map(e -> new ResponseEntity<>(e, HttpStatus.OK))
                 .orElseThrow(() -> BankAccountException.operationFailed("Print statement operation failed"));
     }
@@ -49,7 +49,7 @@ public class BankAccountControlller {
      * @return
      */
     @RequestMapping(path = "/{accountId}/deposit/{amount}", method = RequestMethod.POST)
-    public ResponseEntity deposit(@PathVariable("accountId") String accountId, @PathVariable("amount") String amount) {
+    public ResponseEntity deposit(@PathVariable("accountId") String accountId, @PathVariable("amount") String amount) throws BankAccountException {
         assert accountId != null;
         assert amount != null;
         return Optional.ofNullable(bankAccountService.deposit(Long.valueOf(accountId), BigDecimal.valueOf(Long.valueOf(amount))))
@@ -65,7 +65,7 @@ public class BankAccountControlller {
      * @return
      */
     @RequestMapping(path = "/{accountId}/withdrawal/{amount}", method = RequestMethod.GET)
-    public ResponseEntity withdrawal(@PathVariable("accountId") String accountId, @PathVariable("amount") String amount) {
+    public ResponseEntity withdrawal(@PathVariable("accountId") String accountId, @PathVariable("amount") String amount) throws BankAccountException {
         assert accountId != null;
         assert amount != null;
         return Optional.ofNullable(bankAccountService.withdrawal(Long.valueOf(accountId), BigDecimal.valueOf(Long.valueOf(amount))))

@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Data
 @Builder
-public class DetailedBankAccountStatement {
+public class OperationDetails {
     private String operation;
     private Date date;
     private BigDecimal amount;

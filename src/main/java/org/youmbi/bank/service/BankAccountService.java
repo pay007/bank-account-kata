@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.youmbi.bank.entity.AccountEvent;
 import org.youmbi.bank.entity.AccountEventType;
 import org.youmbi.bank.exception.BankAccountException;
-import org.youmbi.bank.model.CurrentBankAccountStatement;
-import org.youmbi.bank.model.DetailedBankAccountStatement;
-import org.youmbi.bank.model.PrintedAccountStatement;
+import org.youmbi.bank.model.BalanceStatement;
+import org.youmbi.bank.model.OperationDetails;
+import org.youmbi.bank.model.AccountStatement;
 import org.youmbi.bank.repository.BankAccountRepository;
 
 import java.math.BigDecimal;
@@ -33,7 +33,7 @@ public class BankAccountService {
      * @param amount amount of the deposit
      * @return
      */
-    public CurrentBankAccountStatement deposit(final Long accountId, final BigDecimal amount) throws BankAccountException {
+    public BalanceStatement deposit(final Long accountId, final BigDecimal amount) throws BankAccountException {
         // create a deposit event
         AccountEvent event = buildAccountEvent(accountId, amount, AccountEventType.DEPOSIT);
         // persist the DEPOSIT event
@@ -41,7 +41,7 @@ public class BankAccountService {
         // query all events using order
         List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // Reduce events to determine current account Balance
-        return getCurrentBankAccountStatement(accountId, amount, accountEvents);
+        return getBalance(accountId, amount, accountEvents);
     }
 
     /**
@@ -52,20 +52,27 @@ public class BankAccountService {
      * @return
      * @throws BankAccountException
      */
-    public CurrentBankAccountStatement withdrawal(final Long accountId, final BigDecimal amount) throws BankAccountException {
+    public BalanceStatement withdrawal(final Long accountId, final BigDecimal amount) throws BankAccountException {
         // create WITHDRAWAL event
         AccountEvent event = buildAccountEvent(accountId, amount, AccountEventType.WITHDRAWAL);
         // save WITHDRAWAL event
         save(event);
         // Reduce events to determine current account Balance
         List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
-        return getCurrentBankAccountStatement(accountId, amount, accountEvents);
+        return getBalance(accountId, amount, accountEvents);
     }
 
 
-    private CurrentBankAccountStatement getCurrentBankAccountStatement(Long accountId, BigDecimal amount, List<AccountEvent> accountEvents) {
+    /**
+     * build the {@link BalanceStatement} by computing current account balance
+     * @param accountId
+     * @param amount
+     * @param accountEvents
+     * @return
+     */
+    private BalanceStatement getBalance(Long accountId, BigDecimal amount, List<AccountEvent> accountEvents) {
         BigDecimal balance = computeBalance(accountEvents);
-        return CurrentBankAccountStatement.builder()
+        return BalanceStatement.builder()
                 .accountId(accountId)
                 .amount(amount)
                 .balance(balance)
@@ -75,40 +82,40 @@ public class BankAccountService {
 
 
     /**
-     *
+     * Service to print account statement with details of all operation
      * @param accountId
      * @return
      * @throws BankAccountException
      */
-    public PrintedAccountStatement printDetailedStatement(final Long accountId) throws BankAccountException {
+    public AccountStatement getAccountStatement(final Long accountId) throws BankAccountException {
         // query all event and print them order by date of event
         List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // convert to DetailedBankAccountStatement
-        CurrentBankAccountStatement currentBankAccountStatement = getCurrentBankAccountStatement(accountId, null, accountEvents);
-        Function<AccountEvent, DetailedBankAccountStatement> converter = (event) -> DetailedBankAccountStatement.builder()
+        BalanceStatement balanceStatement = getBalance(accountId, null, accountEvents);
+        Function<AccountEvent, OperationDetails> converter = (event) -> OperationDetails.builder()
                 .amount(event.getAmount())
                 .date(event.getEventDate())
                 .operation(event.getEventType().toString())
                 .build();
-        List<DetailedBankAccountStatement> details = accountEvents.stream().map(converter).collect(Collectors.toList());
+        List<OperationDetails> details = accountEvents.stream().map(converter).collect(Collectors.toList());
 
-        return PrintedAccountStatement.builder()
+        return AccountStatement.builder()
                 .details(details)
-                .summary(currentBankAccountStatement)
+                .balanceStatement(balanceStatement)
                 .build();
     }
 
     /**
-     * Aggregate Events to determine account balance
+     * Service to aggregate Events and compute account balance
      *
      * @param accountId
-     * @return {@link CurrentBankAccountStatement} aggregate representation
+     * @return {@link BalanceStatement} aggregate representation
      */
-    public CurrentBankAccountStatement getCurrentAccountStatement(final Long accountId) {
+    public BalanceStatement getCurrentAccountStatement(final Long accountId) {
         // query all events using order
         List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // Reduce events to determine current account Balance
-        return getCurrentBankAccountStatement(accountId, BigDecimal.ONE, accountEvents);
+        return getBalance(accountId, BigDecimal.ONE, accountEvents);
     }
 
     /**
