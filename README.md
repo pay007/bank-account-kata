@@ -1,6 +1,6 @@
 # bank-account-kata 
 
-# Requierement
+# Requirements
 
 https://gist.github.com/abachar/d20bdcd07dac589feef8ef21b487648c
 
@@ -20,6 +20,7 @@ This implementation is based on following assumption:
  - Test are covering basis use cases for simplicity
      
 # Description of implementation
+
 This implementation is handling all user operations as ```Event``` and store them.
   - ElasticSearch is used as event storage (for simplicity i'm using a cluster with single node running on docker)
       Quick setup:
