@@ -38,11 +38,11 @@ This implementation is handling all user operations as ```Event``` and store the
       ```
   - The service can run into IDE directly (no docker image created yet for simplicity)
       For test :
-      - DEPOSIT:  ```curl -X POST "localhost:8080/bank/12/deposit/200" ```
-      - WITHDRAWAL ``` curl -X GET "localhost:8080/bank/12/withdrawal/100" ```
-      - PRINT STATEMENT ``` curl -X GET "localhost:8080/bank/12/printstatement" ```
+      - DEPOSIT:  ``` curl -X POST  -d '{"accountId":"2","amount":"600"}' -H "Content-Type: application/json" "localhost:8080/bank/deposit"```
+      - WITHDRAWAL ```  curl -X POST  -d '{"accountId":"2","amount":"600"}' -H "Content-Type: application/json" "localhost:8080/bank/withdrawal"" ```
+      - PRINT STATEMENT ``` curl -X GET "localhost:8080/bank/printstatement/2" ```
 
 With this approach, we can compute the account balance on demand by pulling all events matching with some criteria (like date) and aggragete them based on the type of event (DEPOSIT or WITHDRAWAL),
 
-# Constraint, limitation
+# Constraint
 - Eventual consistency of the system due to distributed nature of storage
