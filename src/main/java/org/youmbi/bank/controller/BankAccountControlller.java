@@ -32,7 +32,7 @@ public class BankAccountControlller {
      * @return list of {@link OperationDetails}
      * @throws Exception
      */
-    @RequestMapping(path = "/{accountId}/printstatement", method = RequestMethod.GET)
+    @RequestMapping(path = "/printstatement/{accountId}", method = RequestMethod.GET)
     public ResponseEntity<AccountStatement> printStatement(@PathVariable("accountId") String accountId) throws BankAccountException {
         assert accountId != null;
         return Optional.ofNullable(bankAccountService.getAccountStatement(Long.valueOf(accountId)))
@@ -43,35 +43,28 @@ public class BankAccountControlller {
 
     /**
      * Apply deposit of specified amount on specified account ID
-     *
-     * @param accountId account Id on which deposit is performed
-     * @param amount    deposit amount
+     * @param requestParam {@link RequestParam}
      * @return
+     * @throws BankAccountException
      */
-    @RequestMapping(path = "/{accountId}/deposit/{amount}", method = RequestMethod.POST)
-    public ResponseEntity deposit(@PathVariable("accountId") String accountId, @PathVariable("amount") String amount) throws BankAccountException {
-        assert accountId != null;
-        assert amount != null;
-        return Optional.ofNullable(bankAccountService.deposit(Long.valueOf(accountId), BigDecimal.valueOf(Long.valueOf(amount))))
+    @RequestMapping(path = "/deposit", method = RequestMethod.POST)
+    public ResponseEntity deposit(@RequestBody RequestParam requestParam) throws BankAccountException {
+        return Optional.ofNullable(bankAccountService.deposit(Long.valueOf(requestParam.getAccountId()), BigDecimal.valueOf(Long.valueOf(requestParam.getAmount()))))
                 .map(e -> new ResponseEntity<>(e, HttpStatus.OK))
                 .orElseThrow(() -> BankAccountException.operationFailed("Deposit operation failed"));
     }
 
     /**
      * Apply Withdrawal of specified amount on specified account ID
-     *
-     * @param accountId account Id on which deposit is performed
-     * @param amount    withdrawal amount
+     * @param requestParam {@link RequestParam}
      * @return
+     * @throws BankAccountException
      */
-    @RequestMapping(path = "/{accountId}/withdrawal/{amount}", method = RequestMethod.GET)
-    public ResponseEntity withdrawal(@PathVariable("accountId") String accountId, @PathVariable("amount") String amount) throws BankAccountException {
-        assert accountId != null;
-        assert amount != null;
-        return Optional.ofNullable(bankAccountService.withdrawal(Long.valueOf(accountId), BigDecimal.valueOf(Long.valueOf(amount))))
+    @RequestMapping(path = "/withdrawal", method = RequestMethod.POST)
+    public ResponseEntity withdrawal(@RequestBody RequestParam requestParam) throws BankAccountException {
+        return Optional.ofNullable(bankAccountService.withdrawal(Long.valueOf(requestParam.getAccountId()), BigDecimal.valueOf(Long.valueOf(requestParam.getAmount()))))
                 .map(e -> new ResponseEntity<>(e, HttpStatus.OK))
                 .orElseThrow(() -> BankAccountException.operationFailed("Withdrawal operation failed"));
     }
-
 
 }
