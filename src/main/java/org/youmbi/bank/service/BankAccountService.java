@@ -6,14 +6,15 @@ import org.springframework.stereotype.Service;
 import org.youmbi.bank.entity.AccountEvent;
 import org.youmbi.bank.entity.AccountEventType;
 import org.youmbi.bank.exception.BankAccountException;
+import org.youmbi.bank.model.AccountStatement;
 import org.youmbi.bank.model.BalanceStatement;
 import org.youmbi.bank.model.OperationDetails;
-import org.youmbi.bank.model.AccountStatement;
 import org.youmbi.bank.repository.BankAccountRepository;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,8 +30,9 @@ public class BankAccountService {
 
     /**
      * Service to perform deposit on account
+     *
      * @param accountId account id
-     * @param amount amount of the deposit
+     * @param amount    amount of the deposit
      * @return
      */
     public BalanceStatement deposit(final Long accountId, final BigDecimal amount) throws BankAccountException {
@@ -39,12 +41,13 @@ public class BankAccountService {
         // persist the DEPOSIT event
         save(event);
         // query all events using order
-        List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
+        Set<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // Reduce events to determine current account Balance
         return getBalance(accountId, amount, accountEvents);
     }
 
     /**
+     * Service to perform withdrawal on account
      * For simplicity there is no Overdraft limit
      *
      * @param accountId
@@ -58,19 +61,20 @@ public class BankAccountService {
         // save WITHDRAWAL event
         save(event);
         // Reduce events to determine current account Balance
-        List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
+        Set<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         return getBalance(accountId, amount, accountEvents);
     }
 
 
     /**
      * build the {@link BalanceStatement} by computing current account balance
+     *
      * @param accountId
      * @param amount
      * @param accountEvents
      * @return
      */
-    private BalanceStatement getBalance(Long accountId, BigDecimal amount, List<AccountEvent> accountEvents) {
+    private BalanceStatement getBalance(Long accountId, BigDecimal amount, Set<AccountEvent> accountEvents) {
         BigDecimal balance = computeBalance(accountEvents);
         return BalanceStatement.builder()
                 .accountId(accountId)
@@ -83,13 +87,14 @@ public class BankAccountService {
 
     /**
      * Service to print account statement with details of all operation
+     *
      * @param accountId
      * @return
      * @throws BankAccountException
      */
     public AccountStatement getAccountStatement(final Long accountId) throws BankAccountException {
         // query all event and print them order by date of event
-        List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
+        Set<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // convert to DetailedBankAccountStatement
         BalanceStatement balanceStatement = getBalance(accountId, null, accountEvents);
         Function<AccountEvent, OperationDetails> converter = (event) -> OperationDetails.builder()
@@ -113,7 +118,7 @@ public class BankAccountService {
      */
     public BalanceStatement getBalanceStatement(final Long accountId) {
         // query all events using order
-        List<AccountEvent> accountEvents = getEventsByAccountId(accountId);
+        Set<AccountEvent> accountEvents = getEventsByAccountId(accountId);
         // Reduce events to determine current account Balance
         return getBalance(accountId, BigDecimal.ONE, accountEvents);
     }
@@ -125,7 +130,7 @@ public class BankAccountService {
      * @param accountEvents list of {@link AccountEvent}
      * @return balance {@link BigDecimal}BigDecimal
      */
-    private BigDecimal computeBalance(List<AccountEvent> accountEvents) {
+    private BigDecimal computeBalance(Set<AccountEvent> accountEvents) {
         BigDecimal balance = accountEvents.stream().
                 reduce(BigDecimal.ZERO, (acc, event) -> event.processEvent(acc), BigDecimal::add);
         return balance;
@@ -138,7 +143,7 @@ public class BankAccountService {
      * @param accountId bank account ID
      * @return list of {@link AccountEvent} matching accountId
      */
-    private List<AccountEvent> getEventsByAccountId(Long accountId) {
+    private Set<AccountEvent> getEventsByAccountId(Long accountId) {
         return bankAccountRepository.findByAccountId(accountId);
     }
 
@@ -160,12 +165,11 @@ public class BankAccountService {
      * @return
      */
     private AccountEvent buildAccountEvent(Long accountId, BigDecimal amount, AccountEventType eventType) {
-        AccountEvent event = AccountEvent.builder()
+        return AccountEvent.builder()
                 .accountId(accountId)
                 .eventDate(new Date())
                 .eventType(eventType)
                 .amount(amount).build();
-        return event;
     }
 
 

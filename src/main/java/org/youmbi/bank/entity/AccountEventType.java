@@ -11,15 +11,16 @@ public enum AccountEventType {
         this.eventProcessor = eventProcessor;
     }
 
-    BiFunction<BigDecimal, BigDecimal,BigDecimal> eventProcessor;
+    BiFunction<BigDecimal, BigDecimal, BigDecimal> eventProcessor;
 
     /**
-     * Each Event type provide his own processor,
-     * @param balance
-     * @param amount
+     * Each Event type is providing his own processor,
+     *
+     * @param balance the initial balance on which we will apply the amount (add or remove)
+     * @param amount  the amount to add or remove based on event type (DEPOSIT or WITHDRAWAL)
      * @return
      */
     public BigDecimal process(BigDecimal balance, BigDecimal amount) {
-        return eventProcessor.apply(balance,amount);
+        return eventProcessor.apply(balance, amount);
     }
 }

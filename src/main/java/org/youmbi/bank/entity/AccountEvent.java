@@ -1,16 +1,14 @@
 package org.youmbi.bank.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.security.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 
@@ -20,9 +18,9 @@ import java.util.UUID;
 @Builder
 
 /**
- * Each operation perform on bank account is manage as Event
- * This Document representing each event
- * We are supporting 2 type {@link AccountEventType} of event/
+ * Each operation performed on bank account is managed as Event
+ * This Document is representing each event
+ * We are supporting 2 types {@link AccountEventType} of event
  *  - DEPOSIT (event which increment account balance)
  *  - WITHDRAWAL (event which decrement account balance)
  *
@@ -37,8 +35,8 @@ public class AccountEvent implements Serializable {
     private AccountEventType eventType;
     private BigDecimal amount;
 
-    public BigDecimal processEvent(final BigDecimal balance){
-        return this.eventType.process(balance,this.amount);
+    public BigDecimal processEvent(final BigDecimal balance) {
+        return this.eventType.process(balance, this.amount);
     }
 
 }

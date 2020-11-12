@@ -35,7 +35,7 @@ class BankAccountServiceTest {
 
     @Test
     void balance_should_be_400_when_deposit_400_and_previous_balance_was_0() {
-        Long accountId = 0L;
+        Long accountId = 1000L;
         BigDecimal amount = BigDecimal.valueOf(400);
         BigDecimal expectedBalance = BigDecimal.valueOf(400);
         BalanceStatement bankAccountStatement = bankAccountService.deposit(accountId, amount);
@@ -57,7 +57,7 @@ class BankAccountServiceTest {
 
     @Test
     void balance_should_be_1000_after_deposit_600_then_600_and_withdrawal_200() {
-        Long accountId = 0L;
+        Long accountId = 1000L;
         BigDecimal expected = BigDecimal.valueOf(1000);
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
@@ -68,7 +68,7 @@ class BankAccountServiceTest {
 
     @Test
     void detailed_statement_should_be_printed_with_all_operations() {
-        Long accountId = 0L;
+        Long accountId = 1000L;
         BigDecimal expected = BigDecimal.valueOf(800);
         bankAccountService.deposit(accountId, BigDecimal.valueOf(600));
         bankAccountService.withdrawal(accountId, BigDecimal.valueOf(200));

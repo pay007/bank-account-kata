@@ -4,9 +4,9 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 import org.youmbi.bank.entity.AccountEvent;
 
-import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface BankAccountRepository extends ElasticsearchRepository<AccountEvent, String> {
-    List<AccountEvent> findByAccountId(Long accountId);
+    Set<AccountEvent> findByAccountId(Long accountId);
 }
